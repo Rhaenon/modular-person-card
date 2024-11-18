@@ -30,6 +30,11 @@ class ModularPersonEntityCardEditor extends LitElement {
     };
   }
 
+
+  _computeLabel = (schema) => {
+    return schema.label;
+  };
+
   render() {
     if (!this.hass) return html``;
 
@@ -86,6 +91,7 @@ class ModularPersonEntityCardEditor extends LitElement {
         .hass=${this.hass}
         .data=${this._config}
         .schema=${schema}
+        .computeLabel=${this._computeLabel}
         @value-changed=${this._valueChanged}
       ></ha-form>
     `;
