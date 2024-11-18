@@ -1,4 +1,5 @@
 import { LitElement, html, css } from "https://unpkg.com/lit-element@2.0.1/lit-element.js?module";
+import './modular-person-popup.js';
 
 class ModularPersonEntityCard extends LitElement {
   static get properties() {
@@ -35,9 +36,11 @@ class ModularPersonEntityCard extends LitElement {
       .card-content {
         display: flex;
         flex-direction: var(--flex-direction, row);
+        flex-wrap: wrap;
+        row-gap: 5px;
+        column-gap: 25px;
         align-items: center;
         justify-content: center;
-        gap: var(--gap, 10px);
         text-align: var(--text-align, left);
         width: 100%;
         padding: var(--padding, 10px 5px 5px 10px);
@@ -45,8 +48,6 @@ class ModularPersonEntityCard extends LitElement {
       .entity-picture-container {
         position: relative;
         display: inline-block;
-        margin-right: var(--margin-right, 20px);
-        margin-bottom: var(--margin-bottom, 0px);
         text-align: center;
       }
       .entity-picture {
@@ -157,13 +158,12 @@ class ModularPersonEntityCard extends LitElement {
           --icon-background-color: ${iconBackgroundColor};
           --flex-direction: ${showName ? "row" : "column"};
           --justify-content: ${showName ? "center" : "flex-start"};
-          --gap: ${showName ? "10px" : "0"};
+          --column-gap: ${showName ? "25px" : "5px"};
+          --row-gap: ${showName ? "5px" : "0"};
           --text-align: ${showName ? "left" : "center"};
           --padding: ${showName
             ? "10px 5px 5px 10px"
             : "10px 5px 5px 5px"};
-          --margin-right: ${showName ? "20px" : "0px"};
-          --margin-bottom: ${showName ? "0px" : "10px"};
         "
       >
         <div class="card-content ${layoutClass} ${alignmentClass}">
@@ -254,194 +254,13 @@ class ModularPersonEntityCard extends LitElement {
     }
   }
 
-async _showPopup() {
-  const entityId = this.config.entity;
-  const proximityEntityId = this.config.proximity_entity;
-  const findPhoneScriptId = this.config.findPhoneScriptId;
-
-  // Create an overlay to act as a backdrop for the dialog
-  const overlay = document.createElement('div');
-  overlay.style.position = 'fixed';
-  overlay.style.top = 0;
-  overlay.style.left = 0;
-  overlay.style.width = '100%';
-  overlay.style.height = '100%';
-  overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-  overlay.style.zIndex = '9999';
-  overlay.style.display = 'flex';
-  overlay.style.justifyContent = 'center';
-  overlay.style.alignItems = 'center';
-
-  // Create the dialog container
-  const dialog = document.createElement('div');
-  dialog.style.backgroundColor = 'var(--card-background-color, white)';
-  dialog.style.borderRadius = '6px';
-  dialog.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.3)';
-  dialog.style.maxWidth = '500px';
-  dialog.style.width = '90%';
-  dialog.style.maxHeight = '90%';
-  dialog.style.overflow = 'auto';
-  dialog.style.padding = '16px';
-  dialog.style.position = 'relative';
-
-  // Create the header
-  const header = document.createElement('div');
-  header.style.display = 'flex';
-  header.style.justifyContent = 'space-between';
-  header.style.alignItems = 'center';
-  header.style.marginBottom = '16px';
-
-  const title = document.createElement('div');
-  title.style.fontSize = '1.5em';
-  title.style.fontWeight = 'bold';
-  title.textContent = this.config.name || "Person Details";
-
-  const closeButton = document.createElement('ha-icon-button');
-  closeButton.setAttribute('label', 'Close');
-  closeButton.setAttribute('icon', 'mdi:close');
-  closeButton.addEventListener('click', () => {
-    document.body.removeChild(overlay);
-  });
-
-  header.appendChild(title);
-  header.appendChild(closeButton);
-  dialog.appendChild(header);
-
-  // Create the vertical-stack card configuration
-  const verticalStackConfig = {
-    type: 'vertical-stack',
-    cards: [],
-  };
-
-  // Add the entities card
-  const entitiesCardConfig = {
-    type: 'entities',
-    state_color: true,
-    entities: [
-      {
-        entity: entityId,
-        secondary_info: 'last-changed',
-        name:
-          this.config.name ||
-          this.hass.states[entityId].attributes.friendly_name ||
-          entityId,
-        tap_action: {
-          action: 'more-info',
-        },
-      },
-    ],
-  };
-
-  if (proximityEntityId && this.hass.states[proximityEntityId]) {
-    entitiesCardConfig.entities.push({
-      entity: proximityEntityId,
-      name: 'Proximity',
-      icon: 'mdi:map-marker-distance',
-      tap_action: {
-        action: 'more-info',
-      },
-    });
+_showPopup() {
+    const popup = document.createElement('modular-person-popup');
+    popup.hass = this.hass;
+    popup.config = this.config;
+    popup.entityId = this.config.entity;
+    document.body.appendChild(popup);
   }
-
-  verticalStackConfig.cards.push(entitiesCardConfig);
-
-  // Add the map card
-  const mapCardConfig = {
-    type: 'map',
-    entities: [entityId],
-    default_zoom: 15,
-    aspect_ratio: '4:3',
-    hours_to_show: 16,
-  };
-  verticalStackConfig.cards.push(mapCardConfig);
-
-  // Add the history graph
-  const historyCardConfig = {
-    type: 'history-graph',
-    hours_to_show: 16,
-    entities: [
-      {
-        entity: entityId,
-        name:
-          this.config.name ||
-          this.hass.states[entityId].attributes.friendly_name ||
-          entityId,
-        tap_action: {
-          action: 'more-info',
-        },
-      },
-    ],
-  };
-  verticalStackConfig.cards.push(historyCardConfig);
-
-  // Add the Find Phone button card if available
-  if (findPhoneScriptId && this.hass.states[findPhoneScriptId]) {
-    const buttonCardConfig = {
-      type: 'button',
-      name: 'Find Phone', // Displayed name on the button
-      tap_action: {
-        action: 'call-service',
-        service: 'script.turn_on', // Call the script service
-        service_data: {
-          entity_id: findPhoneScriptId,
-        },
-      },
-      show_icon: false, // Hide the icon to show only the name
-    };
-
-    verticalStackConfig.cards.push(buttonCardConfig);
-  }
-
-  // Load card helpers
-  let helpers;
-  if (window.loadCardHelpers) {
-    helpers = await window.loadCardHelpers();
-  } else {
-    helpers = null;
-  }
-
-  // Function to create Lovelace elements
-  const createCardElement = async (config) => {
-    let element;
-    if (helpers) {
-      element = await helpers.createCardElement(config);
-    } else {
-      // Fallback if helpers are not available
-      const elClass = customElements.get(`hui-${config.type}-card`);
-      if (elClass) {
-        element = new elClass();
-        element.setConfig(config);
-      } else {
-        element = null;
-      }
-    }
-    if (element) {
-      element.hass = this.hass;
-    }
-    return element;
-  };
-
-  // Create the vertical-stack card
-  const verticalStackCard = await createCardElement(verticalStackConfig);
-  if (verticalStackCard) {
-    dialog.appendChild(verticalStackCard);
-  } else {
-    dialog.appendChild(
-      document.createTextNode('Error creating vertical-stack card.')
-    );
-  }
-
-  overlay.appendChild(dialog);
-  document.body.appendChild(overlay);
-
-  // Remove the dialog when clicking outside of it
-  overlay.addEventListener('click', (event) => {
-    if (event.target === overlay) {
-      document.body.removeChild(overlay);
-    }
-  });
-}
-
 
   // Adding support for the UI editor
   static getConfigElement() {
