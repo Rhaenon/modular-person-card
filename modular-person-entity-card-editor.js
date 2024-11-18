@@ -1,7 +1,4 @@
-import {
-  LitElement,
-  html,
-} from "https://unpkg.com/lit-element@2.0.1/lit-element.js?module";
+import { LitElement, html } from "https://unpkg.com/lit-element@2.0.1/lit-element.js?module";
 
 class ModularPersonEntityCardEditor extends LitElement {
   static get properties() {
@@ -13,46 +10,73 @@ class ModularPersonEntityCardEditor extends LitElement {
 
   constructor() {
     super();
-    this._config = {};
+    // Initialize _config with default values
+    this._config = {
+      entity: '',
+      proximity_entity: '',
+      findPhoneScriptId: '',
+      show_name: true,
+    };
   }
 
   setConfig(config) {
-    this._config = config || {};
-    this.requestUpdate();
+    // Merge the provided config with default values
+    this._config = {
+      entity: '',
+      proximity_entity: '',
+      findPhoneScriptId: '',
+      show_name: true,
+      ...config,
+    };
   }
 
   render() {
     if (!this.hass) return html``;
 
+    // Ensure _config is defined and has all required properties
+    if (!this._config) {
+      this._config = {
+        entity: '',
+        proximity_entity: '',
+        findPhoneScriptId: '',
+        show_name: true,
+      };
+    }
+
     // Schema for ha-form
     const schema = [
       {
-        name: "Person",
-        property: "entity",
+        name: "entity",
+        required: true,
         selector: {
-          entity: { domain: "person" }, // Shows only person entities
+          entity: {
+            domain: "person",
+          },
         },
+        label: "Person",
       },
       {
-        name: "Proximity",
-        property: "proximity_entity",
+        name: "proximity_entity",
         selector: {
-          entity: { domain: "sensor" }, // Shows only sensor entities for proximity
+          entity: {
+            domain: "sensor",
+          },
         },
+        label: "Proximity",
       },
       {
-        name: "Find Phone Script",
-        property: "findPhoneScriptId",
+        name: "findPhoneScriptId",
         selector: {
-          entity: { domain: "script" }, // Shows only script entities for find phone
+          entity: {
+            domain: "script",
+          },
         },
+        label: "Find Phone Script",
       },
       {
-        name: "Show Name",
-        property: "show_name",
-        selector: {
-          boolean: {}, // Creates a toggle switch
-        },
+        name: "show_name",
+        type: "boolean",
+        label: "Show Name",
       },
     ];
 
@@ -72,22 +96,33 @@ class ModularPersonEntityCardEditor extends LitElement {
       return;
     }
 
-    const _config = Object.assign({}, this._config, ev.detail.value);
+    // The new configuration is in ev.detail.value
+    const config = ev.detail.value;
 
-    this._config = _config;
+    // Update the local config with defaults
+    this._config = {
+      entity: '',
+      proximity_entity: '',
+      findPhoneScriptId: '',
+      show_name: true,
+      ...config,
+    };
 
     // Dispatch config-changed event to save the changes
-    const event = new CustomEvent("config-changed", {
-      detail: { config: _config },
-      bubbles: true,
-      composed: true,
-    });
-    this.dispatchEvent(event);
+    this.dispatchEvent(
+      new CustomEvent("config-changed", {
+        detail: { config: this._config },
+        bubbles: true,
+        composed: true,
+      })
+    );
   }
 }
 
-// Register the custom element
-customElements.define('modular-person-entity-card-editor', ModularPersonEntityCardEditor);
+customElements.define(
+  "modular-person-entity-card-editor",
+  ModularPersonEntityCardEditor
+);
 
 window.customCards = window.customCards || [];
 window.customCards.push({
