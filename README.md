@@ -73,7 +73,7 @@ Custom entities serve two purposes:
 - they appear as extra rows in the popup
 - they can override the main card icon and badge color when their rule matches
 
-If `interactive_icon: true` and the rule matches, that row can become the main card’s active icon/color override.
+If `interactive_icon: true` and the rule matches, that row can become the main card's active icon/color override.
 
 ### Custom colors
 
