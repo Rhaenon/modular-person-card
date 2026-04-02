@@ -1,4 +1,10 @@
-# Modular Person Entity Card
+# Modular Person Card
+
+![Modular Person Card preview](assets/preview.svg)
+
+[![Latest release](https://img.shields.io/github/v/release/Rhaenon/modular-person-card?display_name=tag&sort=semver)](https://github.com/Rhaenon/modular-person-card/releases)
+[![License](https://img.shields.io/github/license/Rhaenon/modular-person-card)](LICENSE)
+[![Validate](https://github.com/Rhaenon/modular-person-card/actions/workflows/validate.yml/badge.svg)](https://github.com/Rhaenon/modular-person-card/actions/workflows/validate.yml)
 
 A Home Assistant Lovelace card for showing a `person` or `device_tracker` as a clean compact card with:
 
@@ -9,6 +15,36 @@ A Home Assistant Lovelace card for showing a `person` or `device_tracker` as a c
 - custom rules that can change the main icon and badge color
 
 It works well for people, phones, cars, bikes, pets, or any tracker-based entity you want to surface quickly on a dashboard.
+
+## HACS
+
+This repository is prepared for HACS custom repository usage as a `Dashboard` repository.
+
+### Install with HACS custom repositories
+
+1. Open HACS in Home Assistant.
+2. Open the menu in the top-right corner.
+3. Select `Custom repositories`.
+4. Add `https://github.com/Rhaenon/modular-person-card`.
+5. Select category `Dashboard`.
+6. Install `Modular Person Card`.
+
+HACS should normally register the dashboard resource automatically. If it does not, add this resource manually:
+
+```yaml
+- url: /hacsfiles/modular-person-card/modular-person-card.js
+  type: module
+```
+
+### Install manually
+
+Copy these files into your Home Assistant `www/community/modular-person-entity-card/` folder:
+
+- `modular-person-entity-card.js`
+- `modular-person-entity-card-editor.js`
+- `modular-person-popup.js`
+
+Then add the resources in Lovelace.
 
 ## What This Card Can Do
 
@@ -86,14 +122,6 @@ You can override badge colors for:
 - ring active state
 
 ## Installation
-
-Copy these files into your Home Assistant `www/community/modular-person-entity-card/` folder:
-
-- `modular-person-entity-card.js`
-- `modular-person-entity-card-editor.js`
-- `modular-person-popup.js`
-
-Then add the resources in Lovelace.
 
 ### Required resource
 
@@ -427,3 +455,21 @@ The included editor supports:
 - `ring_charging_entity` is still supported as a legacy fallback for `ring_boolean_entity`
 - if the main entity has no GPS coordinates, the popup map cannot be shown
 - if the ring entity does not expose a numeric value, the ring is not rendered
+
+## Releases
+
+HACS can install from the default branch, but GitHub releases are recommended because HACS will prefer the latest published release when one exists.
+
+Suggested release flow:
+
+1. Update [CHANGELOG.md](CHANGELOG.md).
+2. Commit and push to `main`.
+3. Create a GitHub release such as `v1.0.0`.
+4. Use the same version number consistently in the tag and release title.
+
+If you later want to submit this repository to the default HACS store, the HACS docs currently require:
+
+- a valid custom-repository structure
+- passing HACS validation
+- at least one published GitHub release
+- a public GitHub repository with description and topics
