@@ -1,6 +1,6 @@
 # Modular Person Card
 
-![Modular Person Card preview](assets/preview.png)
+![Modular Person Card preview](https://raw.githubusercontent.com/Rhaenon/modular-person-card/main/assets/preview.png)
 
 A Home Assistant Lovelace card for showing a `person` or `device_tracker` as a clean compact card with:
 

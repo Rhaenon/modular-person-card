@@ -1,6 +1,5 @@
 {
   "name": "Modular Person Card",
   "content_in_root": true,
-  "filename": "modular-person-card.js",
-  "render_readme": true
+  "filename": "modular-person-card.js"
 }
