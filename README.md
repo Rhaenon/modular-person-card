@@ -2,10 +2,6 @@
 
 ![Modular Person Card preview](assets/preview.png)
 
-[![Latest release](https://img.shields.io/github/v/release/Rhaenon/modular-person-card?display_name=tag&sort=semver)](https://github.com/Rhaenon/modular-person-card/releases)
-[![License](https://img.shields.io/github/license/Rhaenon/modular-person-card)](LICENSE)
-[![Validate](https://github.com/Rhaenon/modular-person-card/actions/workflows/validate.yml/badge.svg)](https://github.com/Rhaenon/modular-person-card/actions/workflows/validate.yml)
-
 A Home Assistant Lovelace card for showing a `person` or `device_tracker` as a clean compact card with:
 
 - avatar or entity picture
