@@ -1,6 +1,6 @@
 # Modular Person Card
 
-![Modular Person Card preview](assets/preview.svg)
+![Modular Person Card preview](assets/preview.png)
 
 [![Latest release](https://img.shields.io/github/v/release/Rhaenon/modular-person-card?display_name=tag&sort=semver)](https://github.com/Rhaenon/modular-person-card/releases)
 [![License](https://img.shields.io/github/license/Rhaenon/modular-person-card)](LICENSE)
