@@ -1,5 +1,11 @@
-import { LitElement, html, css } from "https://cdn.jsdelivr.net/npm/lit-element@2.4.0/+esm?module";
 import './modular-person-popup.js';
+
+const LitElement =
+  window.LitElement ||
+  Object.getPrototypeOf(customElements.get("ha-panel-lovelace")) ||
+  Object.getPrototypeOf(customElements.get("hui-masonry-view"));
+const html = LitElement.prototype.html;
+const css = LitElement.prototype.css;
 
 class ModularPersonEntityCard extends LitElement {
   static get properties() {
@@ -561,3 +567,10 @@ class ModularPersonEntityCard extends LitElement {
 }
 
 customElements.define("modular-person-entity-card", ModularPersonEntityCard);
+
+window.customCards = window.customCards || [];
+window.customCards.push({
+  type: "modular-person-entity-card",
+  name: "Modular Person Card",
+  description: "Compact person/device tracker card with optional popup and ring indicator.",
+});

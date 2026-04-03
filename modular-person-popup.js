@@ -1,5 +1,9 @@
-import { LitElement, html, css } from
-  "https://cdn.jsdelivr.net/npm/lit-element@2.4.0/+esm?module";
+const LitElement =
+  window.LitElement ||
+  Object.getPrototypeOf(customElements.get("ha-panel-lovelace")) ||
+  Object.getPrototypeOf(customElements.get("hui-masonry-view"));
+const html = LitElement.prototype.html;
+const css = LitElement.prototype.css;
 
 class ModularPersonPopup extends LitElement {
   static get properties() {
