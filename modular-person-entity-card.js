@@ -147,7 +147,6 @@ class ModularPersonEntityCard extends LitElement {
       ring_tracker_enabled: Boolean(config.ring_tracker_enabled ?? config.ring_tracker_entity),
       ring_tracker_entity: "",
       ring_boolean_entity: "",
-      ring_charging_entity: "",
       ring_min: 0,
       ring_max: 100,
       custom_location_colors: Boolean(
@@ -197,7 +196,7 @@ class ModularPersonEntityCard extends LitElement {
     const ringEnabled = this.config.ring_tracker_enabled === true;
     const ringEntityId = ringEnabled ? this.config.ring_tracker_entity : "";
     const ringEntity = ringEntityId ? this.hass.states[ringEntityId] : null;
-    const booleanEntityId = this.config.ring_boolean_entity || this.config.ring_charging_entity;
+    const booleanEntityId = this.config.ring_boolean_entity;
     const chargingEntity = ringEnabled && booleanEntityId ? this.hass.states[booleanEntityId] : null;
     const ringIndicator = this._getRingIndicator(ringEntity, chargingEntity);
     const entityPicture = entity.attributes.entity_picture || "https://via.placeholder.com/40";
@@ -546,7 +545,6 @@ class ModularPersonEntityCard extends LitElement {
         ring_tracker_enabled: false,
         ring_tracker_entity: "",
         ring_boolean_entity: "",
-        ring_charging_entity: "",
         ring_min: 0,
         ring_max: 100,
         custom_location_colors: false,

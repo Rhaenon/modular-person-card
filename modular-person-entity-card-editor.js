@@ -115,7 +115,6 @@ class ModularPersonEntityCardEditor extends LitElement {
         ring_tracker_enabled: ringTrackerEnabled,
         ring_tracker_entity: "",
         ring_boolean_entity: "",
-        ring_charging_entity: "",
         ring_min: 0,
         ring_max: 100,
         custom_location_colors: customLocationColors,

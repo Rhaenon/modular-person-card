@@ -189,7 +189,6 @@ unknown_icon_background_color: "#9e9e9e"
 | `ring_tracker_enabled` | boolean | auto | Enables the ring tracker |
 | `ring_tracker_entity` | string | empty | Numeric entity used for the ring |
 | `ring_boolean_entity` | string | empty | Optional helper entity for active/charging state |
-| `ring_charging_entity` | string | empty | Legacy fallback for `ring_boolean_entity` |
 | `ring_min` | number | `0` | Minimum value for ring normalization |
 | `ring_max` | number | `100` | Maximum value for ring normalization |
 | `custom_location_colors` | boolean | auto | Enables custom badge/ring color values |
@@ -452,7 +451,6 @@ The included editor supports:
 
 ## Compatibility Notes
 
-- `ring_charging_entity` is still supported as a legacy fallback for `ring_boolean_entity`
 - if the main entity has no GPS coordinates, the popup map cannot be shown
 - if the ring entity does not expose a numeric value, the ring is not rendered
 

@@ -109,7 +109,7 @@ class ModularPersonPopup extends LitElement {
     }
 
     const ringEntityId = this.config?.ring_tracker_entity;
-    const ringBooleanEntityId = this.config?.ring_boolean_entity || this.config?.ring_charging_entity;
+    const ringBooleanEntityId = this.config?.ring_boolean_entity;
 
     if (this.config?.ring_tracker_enabled && ringEntityId) {
       const ringTrackerRow = this._createInteractiveRow(ringEntityId);
