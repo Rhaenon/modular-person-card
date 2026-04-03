@@ -406,10 +406,12 @@ var ModularPersonEntityCardEditor = class extends LitElement {
     );
   }
 };
-customElements.define(
-  "modular-person-entity-card-editor",
-  ModularPersonEntityCardEditor
-);
+if (!customElements.get("modular-person-entity-card-editor")) {
+  customElements.define(
+    "modular-person-entity-card-editor",
+    ModularPersonEntityCardEditor
+  );
+}
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "modular-person-entity-card",

@@ -364,4 +364,6 @@ class ModularPersonPopup extends LitElement {
   }
 }
 
-customElements.define("modular-person-popup", ModularPersonPopup);
+if (!customElements.get("modular-person-popup")) {
+  customElements.define("modular-person-popup", ModularPersonPopup);
+}

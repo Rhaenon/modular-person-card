@@ -1,4 +1,5 @@
 import './modular-person-popup.js';
+import './modular-person-entity-card-editor.js';
 
 const HaPanelLovelace = customElements.get("ha-panel-lovelace");
 const HuiMasonryView = customElements.get("hui-masonry-view");
