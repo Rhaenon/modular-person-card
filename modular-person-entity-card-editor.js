@@ -1,7 +1,14 @@
+const HaPanelLovelace = customElements.get("ha-panel-lovelace");
+const HuiMasonryView = customElements.get("hui-masonry-view");
 const LitElement =
   window.LitElement ||
-  Object.getPrototypeOf(customElements.get("ha-panel-lovelace")) ||
-  Object.getPrototypeOf(customElements.get("hui-masonry-view"));
+  (HaPanelLovelace ? Object.getPrototypeOf(HaPanelLovelace) : undefined) ||
+  (HuiMasonryView ? Object.getPrototypeOf(HuiMasonryView) : undefined);
+
+if (!LitElement) {
+  throw new Error("Modular Person Card editor could not find LitElement in Home Assistant.");
+}
+
 const html = LitElement.prototype.html;
 const css = LitElement.prototype.css;
 
