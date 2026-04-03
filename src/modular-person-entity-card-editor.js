@@ -120,6 +120,8 @@ class ModularPersonEntityCardEditor extends LitElement {
       );
       return {
         entity: "",
+        use_entity_picture: true,
+        fallback_icon: "mdi:account",
         proximity_entity: "",
         findPhoneScriptId: "",
         show_history: true,
@@ -147,7 +149,7 @@ class ModularPersonEntityCardEditor extends LitElement {
   render() {
     if (!this.hass) return html``;
 
-    const schema = [
+    const topSchema = [
       {
         name: "entity",
         required: true,
@@ -159,11 +161,18 @@ class ModularPersonEntityCardEditor extends LitElement {
         label: "Entity",
       },
       {
+        name: "use_entity_picture",
+        type: "boolean",
+        label: "Use Entity Picture",
+      },
+      {
         name: "show_name",
         type: "boolean",
         label: "Show Name",
       },
     ];
+
+    const schema = [];
 
     if (this._config.show_name !== false) {
       schema.push({
@@ -306,6 +315,21 @@ class ModularPersonEntityCardEditor extends LitElement {
       <ha-form
         .hass=${this.hass}
         .data=${this._config}
+        .schema=${topSchema}
+        .computeLabel=${this._computeLabel}
+        @value-changed=${this._valueChanged}
+      ></ha-form>
+      ${this._config.use_entity_picture === false ? html`
+        <ha-icon-picker
+          .hass=${this.hass}
+          .value=${this._config.fallback_icon || "mdi:account"}
+          .label=${"Set icon"}
+          @value-changed=${(ev) => this._updateConfigValue("fallback_icon", ev.detail.value)}
+        ></ha-icon-picker>
+      ` : ""}
+      <ha-form
+        .hass=${this.hass}
+        .data=${this._config}
         .schema=${schema}
         .computeLabel=${this._computeLabel}
         @value-changed=${this._valueChanged}
@@ -397,6 +421,15 @@ class ModularPersonEntityCardEditor extends LitElement {
     this._config = { ...this._config, custom_states: customStates };
     this._notifyConfigChanged();
   };
+
+  _updateConfigValue(field, value) {
+    this._config = {
+      ...this._config,
+      [field]: value,
+      custom_states: Array.isArray(this._config.custom_states) ? this._config.custom_states : [],
+    };
+    this._notifyConfigChanged();
+  }
 
   _removeCustomState(index) {
     const customStates = [...(this._config.custom_states || [])];

@@ -438,6 +438,8 @@ var ModularPersonEntityCardEditor = class extends LitElement2 {
     );
     return {
       entity: "",
+      use_entity_picture: true,
+      fallback_icon: "mdi:account",
       proximity_entity: "",
       findPhoneScriptId: "",
       show_history: true,
@@ -461,7 +463,7 @@ var ModularPersonEntityCardEditor = class extends LitElement2 {
   }
   render() {
     if (!this.hass) return html2``;
-    const schema = [
+    const topSchema = [
       {
         name: "entity",
         required: true,
@@ -473,11 +475,17 @@ var ModularPersonEntityCardEditor = class extends LitElement2 {
         label: "Entity"
       },
       {
+        name: "use_entity_picture",
+        type: "boolean",
+        label: "Use Entity Picture"
+      },
+      {
         name: "show_name",
         type: "boolean",
         label: "Show Name"
       }
     ];
+    const schema = [];
     if (this._config.show_name !== false) {
       schema.push({
         name: "mirror_layout",
@@ -611,6 +619,21 @@ var ModularPersonEntityCardEditor = class extends LitElement2 {
       <ha-form
         .hass=${this.hass}
         .data=${this._config}
+        .schema=${topSchema}
+        .computeLabel=${this._computeLabel}
+        @value-changed=${this._valueChanged}
+      ></ha-form>
+      ${this._config.use_entity_picture === false ? html2`
+        <ha-icon-picker
+          .hass=${this.hass}
+          .value=${this._config.fallback_icon || "mdi:account"}
+          .label=${"Set icon"}
+          @value-changed=${(ev) => this._updateConfigValue("fallback_icon", ev.detail.value)}
+        ></ha-icon-picker>
+      ` : ""}
+      <ha-form
+        .hass=${this.hass}
+        .data=${this._config}
         .schema=${schema}
         .computeLabel=${this._computeLabel}
         @value-changed=${this._valueChanged}
@@ -682,6 +705,14 @@ var ModularPersonEntityCardEditor = class extends LitElement2 {
     this._config = {
       ...this._config,
       ...ev.detail.value,
+      custom_states: Array.isArray(this._config.custom_states) ? this._config.custom_states : []
+    };
+    this._notifyConfigChanged();
+  }
+  _updateConfigValue(field, value) {
+    this._config = {
+      ...this._config,
+      [field]: value,
       custom_states: Array.isArray(this._config.custom_states) ? this._config.custom_states : []
     };
     this._notifyConfigChanged();
@@ -833,6 +864,22 @@ var ModularPersonEntityCard = class extends LitElement3 {
         position: relative;
         z-index: 1;
       }
+      .entity-fallback-icon {
+        width: 40px;
+        height: 40px;
+        border: solid 0.15em var(--icon-background-color);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--card-background-color, #1e1e1e);
+        position: relative;
+        z-index: 1;
+        box-sizing: border-box;
+      }
+      .entity-fallback-icon ha-icon {
+        --mdc-icon-size: 22px;
+      }
       .state-icon {
         position: absolute;
         top: -8px;
@@ -882,6 +929,8 @@ var ModularPersonEntityCard = class extends LitElement3 {
     }
     this.config = {
       custom_states: [],
+      use_entity_picture: config.use_entity_picture !== false,
+      fallback_icon: "mdi:account",
       mirror_layout: false,
       show_history: config.show_history !== false,
       history_hours: 24,
@@ -930,7 +979,9 @@ var ModularPersonEntityCard = class extends LitElement3 {
     const booleanEntityId = this.config.ring_boolean_entity;
     const chargingEntity = ringEnabled && booleanEntityId ? this.hass.states[booleanEntityId] : null;
     const ringIndicator = this._getRingIndicator(ringEntity, chargingEntity);
-    const entityPicture = entity.attributes.entity_picture || "https://via.placeholder.com/40";
+    const useEntityPicture = this.config.use_entity_picture !== false;
+    const entityPicture = useEntityPicture ? entity.attributes.entity_picture : "";
+    const avatarIcon = this._getAvatarIcon(entity);
     const stateText = this._getStateDescription(entity);
     const showName = this.config.show_name !== false;
     const mirrorLayout = showName && this.config.mirror_layout === true;
@@ -974,7 +1025,11 @@ var ModularPersonEntityCard = class extends LitElement3 {
                 </svg>
               </div>
             ` : ""}
-            <img src="${entityPicture}" class="entity-picture" />
+            ${entityPicture ? html3`<img src="${entityPicture}" class="entity-picture" />` : html3`
+                <div class="entity-fallback-icon">
+                  <ha-icon icon="${avatarIcon}"></ha-icon>
+                </div>
+              `}
             <div class="state-icon">
               <ha-icon icon="${stateIcon}"></ha-icon>
             </div>
@@ -1010,6 +1065,9 @@ var ModularPersonEntityCard = class extends LitElement3 {
     if (customRule?.icon) return customRule.icon;
     const zone = this._getZoneEntity(entity.state);
     return zone?.attributes?.icon || this._defaultIcon(entity.state);
+  }
+  _getAvatarIcon(entity) {
+    return this.config.fallback_icon || entity.attributes.icon || "mdi:account";
   }
   _getZoneEntity(state) {
     if (!state || !this.hass?.states) return null;

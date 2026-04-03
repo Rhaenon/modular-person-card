@@ -105,6 +105,22 @@ class ModularPersonEntityCard extends LitElement {
         position: relative;
         z-index: 1;
       }
+      .entity-fallback-icon {
+        width: 40px;
+        height: 40px;
+        border: solid 0.15em var(--icon-background-color);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--card-background-color, #1e1e1e);
+        position: relative;
+        z-index: 1;
+        box-sizing: border-box;
+      }
+      .entity-fallback-icon ha-icon {
+        --mdc-icon-size: 22px;
+      }
       .state-icon {
         position: absolute;
         top: -8px;
@@ -155,6 +171,8 @@ class ModularPersonEntityCard extends LitElement {
     }
     this.config = {
       custom_states: [],
+      use_entity_picture: config.use_entity_picture !== false,
+      fallback_icon: "mdi:account",
       mirror_layout: false,
       show_history: config.show_history !== false,
       history_hours: 24,
@@ -213,7 +231,9 @@ class ModularPersonEntityCard extends LitElement {
     const booleanEntityId = this.config.ring_boolean_entity;
     const chargingEntity = ringEnabled && booleanEntityId ? this.hass.states[booleanEntityId] : null;
     const ringIndicator = this._getRingIndicator(ringEntity, chargingEntity);
-    const entityPicture = entity.attributes.entity_picture || "https://via.placeholder.com/40";
+    const useEntityPicture = this.config.use_entity_picture !== false;
+    const entityPicture = useEntityPicture ? entity.attributes.entity_picture : "";
+    const avatarIcon = this._getAvatarIcon(entity);
     const stateText = this._getStateDescription(entity);
     const showName = this.config.show_name !== false;
     const mirrorLayout = showName && this.config.mirror_layout === true;
@@ -258,7 +278,13 @@ class ModularPersonEntityCard extends LitElement {
                 </svg>
               </div>
             ` : ""}
-            <img src="${entityPicture}" class="entity-picture" />
+            ${entityPicture
+              ? html`<img src="${entityPicture}" class="entity-picture" />`
+              : html`
+                <div class="entity-fallback-icon">
+                  <ha-icon icon="${avatarIcon}"></ha-icon>
+                </div>
+              `}
             <div class="state-icon">
               <ha-icon icon="${stateIcon}"></ha-icon>
             </div>
@@ -297,6 +323,10 @@ class ModularPersonEntityCard extends LitElement {
 
     const zone = this._getZoneEntity(entity.state);
     return zone?.attributes?.icon || this._defaultIcon(entity.state);
+  }
+
+  _getAvatarIcon(entity) {
+    return this.config.fallback_icon || entity.attributes.icon || "mdi:account";
   }
 
   _getZoneEntity(state) {
