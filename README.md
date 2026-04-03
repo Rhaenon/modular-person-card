@@ -49,6 +49,7 @@ Then add the resources in Lovelace.
 
 - Supports `person` and `device_tracker`
 - Shows the entity picture in a circular avatar
+- Can fall back to a configurable icon when no picture is available or when pictures are disabled
 - Shows a badge icon for the current state or zone
 - Shows the entity name optionally
 - Supports mirrored layout when the name is shown
@@ -144,6 +145,16 @@ entity: person.john
 show_name: true
 ```
 
+## Example Without Entity Picture
+
+```yaml
+type: custom:modular-person-entity-card
+entity: person.john
+use_entity_picture: false
+fallback_icon: mdi:account-circle
+show_name: true
+```
+
 ## Person Example With Distance And Popup Map
 
 ```yaml
@@ -177,6 +188,8 @@ unknown_icon_background_color: "#9e9e9e"
 | `entity` | string | required | Main `person` or `device_tracker` entity |
 | `name` | string | entity friendly name | Custom label shown on the card |
 | `icon` | string | `mdi:map-marker-radius` | Fallback main icon for non-standard states |
+| `use_entity_picture` | boolean | `true` | Show the entity picture when available |
+| `fallback_icon` | string | `mdi:account` | Icon used when entity pictures are disabled or unavailable |
 | `show_name` | boolean | `true` | Show the entity name on the card |
 | `mirror_layout` | boolean | `false` | Reverses avatar/text layout when `show_name` is enabled |
 | `proximity_entity` | string | empty | Optional entity used to show distance while away |

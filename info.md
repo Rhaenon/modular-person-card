@@ -3,6 +3,7 @@
 Dashboard card for Home Assistant that displays `person` and `device_tracker` entities with:
 
 - avatar or entity picture
+- optional fallback icon when entity pictures are disabled or unavailable
 - smart home, away, unknown, and zone badges
 - optional 3/4 ring tracker
 - popup details with related rows
