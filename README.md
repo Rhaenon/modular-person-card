@@ -18,8 +18,6 @@ AI was used to help create this card.
 
 ## HACS
 
-This repository is prepared for HACS custom repository usage as a `Dashboard` repository.
-
 ### Install with HACS custom repositories
 
 1. Open HACS in Home Assistant.
@@ -453,21 +451,3 @@ The included editor supports:
 
 - if the main entity has no GPS coordinates, the popup map cannot be shown
 - if the ring entity does not expose a numeric value, the ring is not rendered
-
-## Releases
-
-HACS can install from the default branch, but GitHub releases are recommended because HACS will prefer the latest published release when one exists.
-
-Suggested release flow:
-
-1. Update [CHANGELOG.md](CHANGELOG.md).
-2. Commit and push to `main`.
-3. Create a GitHub release such as `v1.0.0`.
-4. Use the same version number consistently in the tag and release title.
-
-If you later want to submit this repository to the default HACS store, the HACS docs currently require:
-
-- a valid custom-repository structure
-- passing HACS validation
-- at least one published GitHub release
-- a public GitHub repository with description and topics
