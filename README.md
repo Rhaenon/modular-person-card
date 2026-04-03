@@ -30,7 +30,7 @@ AI was used to help create this card.
 HACS should normally register the dashboard resource automatically. If it does not, add this resource manually:
 
 ```yaml
-- url: /hacsfiles/modular-person-card/modular-person-card.js
+- url: /hacsfiles/modular-person-card/modular-person-entity-card.js
   type: module
 ```
 

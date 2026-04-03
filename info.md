@@ -20,6 +20,6 @@ Add this repository to HACS as a custom repository with category `Dashboard`:
 If the Lovelace resource is not added automatically, use:
 
 ```yaml
-- url: /hacsfiles/modular-person-card/modular-person-card.js
+- url: /hacsfiles/modular-person-card/modular-person-entity-card.js
   type: module
 ```
