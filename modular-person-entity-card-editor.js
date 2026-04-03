@@ -1,25 +1,40 @@
-const HaPanelLovelace = customElements.get("ha-panel-lovelace");
-const HuiMasonryView = customElements.get("hui-masonry-view");
-const LitElement =
-  window.LitElement ||
-  (HaPanelLovelace ? Object.getPrototypeOf(HaPanelLovelace) : undefined) ||
-  (HuiMasonryView ? Object.getPrototypeOf(HuiMasonryView) : undefined);
+var __defProp = Object.defineProperty;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
 
+// src/modular-person-entity-card-editor.js
+var HaPanelLovelace = customElements.get("ha-panel-lovelace");
+var HuiMasonryView = customElements.get("hui-masonry-view");
+var LitElement = window.LitElement || (HaPanelLovelace ? Object.getPrototypeOf(HaPanelLovelace) : void 0) || (HuiMasonryView ? Object.getPrototypeOf(HuiMasonryView) : void 0);
 if (!LitElement) {
   throw new Error("Modular Person Card editor could not find LitElement in Home Assistant.");
 }
-
-const html = LitElement.prototype.html;
-const css = LitElement.prototype.css;
-
-class ModularPersonEntityCardEditor extends LitElement {
+var html = LitElement.prototype.html;
+var css = LitElement.prototype.css;
+var ModularPersonEntityCardEditor = class extends LitElement {
+  constructor() {
+    super();
+    __publicField(this, "_computeLabel", (schema) => schema.label);
+    __publicField(this, "_addCustomState", () => {
+      const customStates = [...this._config.custom_states || []];
+      customStates.push({
+        entity: "",
+        state: "on",
+        icon: "",
+        color: "",
+        interactive_icon: true
+      });
+      this._config = { ...this._config, custom_states: customStates };
+      this._notifyConfigChanged();
+    });
+    this._config = this._withDefaults({});
+  }
   static get properties() {
     return {
       hass: { type: Object },
-      _config: { type: Object },
+      _config: { type: Object }
     };
   }
-
   static get styles() {
     return css`
       .section {
@@ -98,148 +113,127 @@ class ModularPersonEntityCardEditor extends LitElement {
       }
     `;
   }
-
-  constructor() {
-    super();
-    this._config = this._withDefaults({});
-  }
-
   setConfig(config) {
     this._config = this._withDefaults(config);
   }
-
   _withDefaults(config) {
-      const ringTrackerEnabled = Boolean(config.ring_tracker_enabled ?? config.ring_tracker_entity);
-      const customLocationColors = Boolean(
-        config.custom_location_colors ??
-        config.home_icon_background_color ??
-        config.away_icon_background_color ??
-        config.zone_icon_background_color ??
-        config.unknown_icon_background_color ??
-        config.ring_active_color
-      );
-      return {
-        entity: "",
-        proximity_entity: "",
-        findPhoneScriptId: "",
-        show_history: true,
-        history_hours: 24,
-        ring_tracker_enabled: ringTrackerEnabled,
-        ring_tracker_entity: "",
-        ring_boolean_entity: "",
-        ring_min: 0,
-        ring_max: 100,
-        custom_location_colors: customLocationColors,
-        home_icon_background_color: "rgb(137,179,248,0.85)",
-        away_icon_background_color: "rgb(244,67,54,0.75)",
-        zone_icon_background_color: "rgb(76, 175, 80, 0.75)",
-        unknown_icon_background_color: "rgb(160,160,160,0.75)",
-        ring_active_color: "rgb(76, 175, 80, 0.75)",
-        show_name: true,
-        mirror_layout: false,
-        custom_states: [],
-        ...config,
-      };
+    const ringTrackerEnabled = Boolean(config.ring_tracker_enabled ?? config.ring_tracker_entity);
+    const customLocationColors = Boolean(
+      config.custom_location_colors ?? config.home_icon_background_color ?? config.away_icon_background_color ?? config.zone_icon_background_color ?? config.unknown_icon_background_color ?? config.ring_active_color
+    );
+    return {
+      entity: "",
+      proximity_entity: "",
+      findPhoneScriptId: "",
+      show_history: true,
+      history_hours: 24,
+      ring_tracker_enabled: ringTrackerEnabled,
+      ring_tracker_entity: "",
+      ring_boolean_entity: "",
+      ring_min: 0,
+      ring_max: 100,
+      custom_location_colors: customLocationColors,
+      home_icon_background_color: "rgb(137,179,248,0.85)",
+      away_icon_background_color: "rgb(244,67,54,0.75)",
+      zone_icon_background_color: "rgb(76, 175, 80, 0.75)",
+      unknown_icon_background_color: "rgb(160,160,160,0.75)",
+      ring_active_color: "rgb(76, 175, 80, 0.75)",
+      show_name: true,
+      mirror_layout: false,
+      custom_states: [],
+      ...config
+    };
   }
-
-  _computeLabel = (schema) => schema.label;
-
   render() {
     if (!this.hass) return html``;
-
     const schema = [
       {
         name: "entity",
         required: true,
         selector: {
           entity: {
-            domain: ["person", "device_tracker"],
-          },
+            domain: ["person", "device_tracker"]
+          }
         },
-        label: "Entity",
+        label: "Entity"
       },
       {
         name: "show_name",
         type: "boolean",
-        label: "Show Name",
-      },
+        label: "Show Name"
+      }
     ];
-
     if (this._config.show_name !== false) {
       schema.push({
         name: "mirror_layout",
         type: "boolean",
-        label: "Mirror Layout",
+        label: "Mirror Layout"
       });
     }
-
     schema.push(
       {
         name: "proximity_entity",
         selector: {
-          entity: {},
+          entity: {}
         },
-        label: "Proximity",
+        label: "Proximity"
       },
       {
         name: "findPhoneScriptId",
         selector: {
           entity: {
-            domain: ["script", "button", "input_button"],
-          },
+            domain: ["script", "button", "input_button"]
+          }
         },
-        label: "Find Phone Script",
+        label: "Find Phone Script"
       },
       {
         label: "Ring Tracker",
         name: "ring_tracker_enabled",
-        type: "boolean",
+        type: "boolean"
       }
     );
-
     if (this._config.ring_tracker_enabled === true) {
       schema.push(
         {
           name: "ring_tracker_entity",
           selector: {
-            entity: {},
+            entity: {}
           },
-          label: "Ring Tracker Entity",
+          label: "Ring Tracker Entity"
         },
         {
           name: "ring_boolean_entity",
           selector: {
-            entity: {},
+            entity: {}
           },
-          label: "Ring Boolean Sensor",
+          label: "Ring Boolean Sensor"
         },
         {
           name: "ring_min",
           selector: {
             number: {
-              mode: "box",
-            },
+              mode: "box"
+            }
           },
-          label: "Ring Minimum",
+          label: "Ring Minimum"
         },
         {
           name: "ring_max",
           selector: {
             number: {
-              mode: "box",
-            },
+              mode: "box"
+            }
           },
-          label: "Ring Maximum",
+          label: "Ring Maximum"
         }
       );
     }
-
     schema.push({
       name: "show_history",
       type: "boolean",
-      label: "Show history?",
+      label: "Show history?"
     });
-
     if (this._config.show_history !== false) {
       schema.push({
         name: "history_hours",
@@ -247,61 +241,57 @@ class ModularPersonEntityCardEditor extends LitElement {
           number: {
             mode: "box",
             min: 1,
-            step: 1,
-          },
+            step: 1
+          }
         },
-        label: "History hours",
+        label: "History hours"
       });
     }
-
     schema.push({
       name: "custom_location_colors",
       type: "boolean",
-      label: "Custom Colors",
+      label: "Custom Colors"
     });
-
     if (this._config.custom_location_colors === true) {
       schema.push(
         {
           name: "home_icon_background_color",
           selector: {
-            text: {},
+            text: {}
           },
-          label: "Home Color",
+          label: "Home Color"
         },
         {
           name: "away_icon_background_color",
           selector: {
-            text: {},
+            text: {}
           },
-          label: "Away Color",
+          label: "Away Color"
         },
         {
           name: "zone_icon_background_color",
           selector: {
-            text: {},
+            text: {}
           },
-          label: "Zone Color",
+          label: "Zone Color"
         },
         {
           name: "unknown_icon_background_color",
           selector: {
-            text: {},
+            text: {}
           },
-          label: "Unknown Color",
+          label: "Unknown Color"
         },
         {
           name: "ring_active_color",
           selector: {
-            text: {},
+            text: {}
           },
-          label: "Ring Active Color",
+          label: "Ring Active Color"
         }
       );
     }
-
     const customStates = Array.isArray(this._config.custom_states) ? this._config.custom_states : [];
-
     return html`
       <ha-form
         .hass=${this.hass}
@@ -372,80 +362,58 @@ class ModularPersonEntityCardEditor extends LitElement {
       </div>
     `;
   }
-
   _valueChanged(ev) {
     if (!this._config || !this.hass) return;
-
     this._config = {
       ...this._config,
       ...ev.detail.value,
-      custom_states: Array.isArray(this._config.custom_states) ? this._config.custom_states : [],
+      custom_states: Array.isArray(this._config.custom_states) ? this._config.custom_states : []
     };
-
     this._notifyConfigChanged();
   }
-
-  _addCustomState = () => {
-    const customStates = [...(this._config.custom_states || [])];
-    customStates.push({
-      entity: "",
-      state: "on",
-      icon: "",
-      color: "",
-      interactive_icon: true,
-    });
-    this._config = { ...this._config, custom_states: customStates };
-    this._notifyConfigChanged();
-  };
-
   _removeCustomState(index) {
-    const customStates = [...(this._config.custom_states || [])];
+    const customStates = [...this._config.custom_states || []];
     customStates.splice(index, 1);
     this._config = { ...this._config, custom_states: customStates };
     this._notifyConfigChanged();
   }
-
   _updateCustomState(index, field, value) {
-    const customStates = [...(this._config.custom_states || [])];
+    const customStates = [...this._config.custom_states || []];
     customStates[index] = {
       ...customStates[index],
-      [field]: value,
+      [field]: value
     };
     this._config = { ...this._config, custom_states: customStates };
     this._notifyConfigChanged();
   }
-
   _updateInteractiveIcon(index, checked) {
-    const customStates = [...(this._config.custom_states || [])];
+    const customStates = [...this._config.custom_states || []];
     customStates[index] = {
       ...customStates[index],
-      interactive_icon: checked,
+      interactive_icon: checked
     };
     this._config = { ...this._config, custom_states: customStates };
     this.requestUpdate();
     this._notifyConfigChanged();
   }
-
   _notifyConfigChanged() {
     this.dispatchEvent(
       new CustomEvent("config-changed", {
         detail: { config: this._config },
         bubbles: true,
-        composed: true,
+        composed: true
       })
     );
   }
-}
-
+};
 customElements.define(
   "modular-person-entity-card-editor",
   ModularPersonEntityCardEditor
 );
-
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: "modular-person-entity-card",
   name: "Modular Person Card",
   preview: true,
-  description: "A modular person card with custom entities and an optional ring tracker.",
+  description: "A modular person card with custom entities and an optional ring tracker."
 });

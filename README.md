@@ -36,11 +36,10 @@ HACS should normally register the dashboard resource automatically. If it does n
 
 ### Install manually
 
-Copy these files into your Home Assistant `www/community/modular-person-entity-card/` folder:
+Copy these bundled release files into your Home Assistant `www/community/modular-person-entity-card/` folder:
 
 - `modular-person-entity-card.js`
 - `modular-person-entity-card-editor.js`
-- `modular-person-popup.js`
 
 Then add the resources in Lovelace.
 
