@@ -12,6 +12,10 @@ A Home Assistant Lovelace card for showing a `person` or `device_tracker` as a c
 
 It works well for people, phones, cars, bikes, pets, or any tracker-based entity you want to surface quickly on a dashboard.
 
+This card was inspired by the [UI Lovelace Minimalist](https://ui-lovelace-minimalist.github.io/UI/usage/cards/card_person/) and [Mushroom Person card](https://github.com/piitaya/lovelace-mushroom/blob/main/docs/cards/person.md).
+
+AI was used to help create this card.
+
 ## HACS
 
 This repository is prepared for HACS custom repository usage as a `Dashboard` repository.
