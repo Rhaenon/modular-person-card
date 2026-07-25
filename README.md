@@ -290,11 +290,11 @@ These fields accept normal CSS color values such as:
 
 ## Popup Behavior
 
-When the main entity has latitude and longitude, the popup shows a Home Assistant map card.
+The popup shows a Home Assistant map card for the main entity.
 
 - If `show_history: true`, the map includes a track history overlay
 - If `show_history: false`, the map shows only the current location
-- If no GPS coordinates are available, the popup shows `Location data not available.`
+- Location availability is handled by Home Assistant's native map card
 
 Example:
 

@@ -570,7 +570,7 @@ class ModularPersonEntityCard extends LitElement {
     popup.hass = this.hass;
     popup.config = this.config;
     popup.entityId = this.config.entity;
-    document.body.appendChild(popup);
+    this.renderRoot.appendChild(popup);
   }
 
   static getConfigElement() {
