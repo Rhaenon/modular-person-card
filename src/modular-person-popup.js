@@ -154,25 +154,17 @@ class ModularPersonPopup extends LitElement {
       excludedEntities.add(rule.entity);
     }
 
-    const entity = this.hass.states?.[this.entityId];
-    const hasGPS = entity?.attributes?.latitude != null && entity?.attributes?.longitude != null;
-
-    if (!hasGPS) {
-      mapContainer.innerHTML = `<div>Location data not available.</div>`;
-      return;
-    }
-
     const historyHours = this._getHistoryHours();
     const showHistory = this.config?.show_history !== false;
     const mapConfig = {
       type: "map",
       entities: [this.entityId],
       default_zoom: 15,
+      theme_mode: "auto",
     };
 
     if (showHistory) {
       mapConfig.hours_to_show = historyHours;
-      mapConfig.track = true;
     }
 
     const mapCard = await this._createCardElement(mapConfig);
