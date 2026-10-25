@@ -156,9 +156,10 @@ class ModularPersonPopup extends LitElement {
 
     const historyHours = this._getHistoryHours();
     const showHistory = this.config?.show_history !== false;
+    const mapColor = typeof this.config?.map_color === "string" ? this.config.map_color.trim() : "";
     const mapConfig = {
       type: "map",
-      entities: [this.entityId],
+      entities: mapColor ? [{ entity: this.entityId, color: mapColor }] : [this.entityId],
       default_zoom: 15,
       theme_mode: "auto",
     };

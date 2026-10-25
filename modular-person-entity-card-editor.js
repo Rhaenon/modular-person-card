@@ -256,6 +256,13 @@ var ModularPersonEntityCardEditor = class extends LitElement {
       });
     }
     schema.push({
+      name: "map_color",
+      selector: {
+        text: {}
+      },
+      label: "Map color (leave empty for default)"
+    });
+    schema.push({
       name: "custom_location_colors",
       type: "boolean",
       label: "Custom Colors"
