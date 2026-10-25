@@ -196,6 +196,7 @@ unknown_icon_background_color: "#9e9e9e"
 | `findPhoneScriptId` | string | empty | Optional script, button, or input button shown in the popup |
 | `show_history` | boolean | `true` | Show map track history in the popup |
 | `history_hours` | number | `24` | Hours of history shown in the popup map |
+| `map_color` | string | empty | Native Home Assistant map color for the person marker and history trail, for example `"#9c27b0"` |
 | `ring_tracker_enabled` | boolean | auto | Enables the ring tracker |
 | `ring_tracker_entity` | string | empty | Numeric entity used for the ring |
 | `ring_boolean_entity` | string | empty | Optional helper entity for active/charging state |
@@ -295,6 +296,7 @@ The popup shows a Home Assistant map card for the main entity.
 - If `show_history: true`, the map includes a track history overlay
 - If `show_history: false`, the map shows only the current location
 - Location availability is handled by Home Assistant's native map card
+- Set `map_color` to use the same color for the map marker and history trail, including when history is disabled. Whitespace is trimmed; omitted, blank, or non-string values use Home Assistant's default color. The visual editor includes a **Map color (leave empty for default)** text field, independent of **Custom Colors**.
 
 Example:
 
@@ -303,6 +305,7 @@ type: custom:modular-person-entity-card
 entity: person.john
 show_history: true
 history_hours: 12
+map_color: "#9c27b0"
 ```
 
 ## Custom Entities

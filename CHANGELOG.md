@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 26.10.1
+
+- Added optional `map_color` to customize the popup map marker and history trail color
+- Added a Map color text field to the visual editor, independent of Custom Colors and history settings
+- Leave the setting empty to keep Home Assistant's default map color
+
 ## 26.07.1
 
 - Fixed popup maps opening without visible person markers or history paths after recent Home Assistant frontend changes
