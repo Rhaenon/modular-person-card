@@ -366,12 +366,13 @@ class ModularPersonEntityCardEditor extends LitElement {
               </div>
 
               ${rule.interactive_icon !== false ? html`
-                <ha-textfield
-                  .value=${rule.state || ""}
-                  .label=${"State / Rule"}
-                  .placeholder=${"on, >100, 10...50, >=10 && <50, <10 || >50"}
-                  @input=${(ev) => this._updateCustomState(index, "state", ev.target.value)}
-                ></ha-textfield>
+                <ha-form
+                  .hass=${this.hass}
+                  .data=${{ state: rule.state || "" }}
+                  .schema=${[{ name: "state", selector: { text: {} }, label: "State / Rule" }]}
+                  .computeLabel=${this._computeLabel}
+                  @value-changed=${(ev) => this._updateCustomState(index, "state", ev.detail.value.state || "")}
+                ></ha-form>
 
                 <ha-icon-picker
                   .hass=${this.hass}
@@ -380,12 +381,13 @@ class ModularPersonEntityCardEditor extends LitElement {
                   @value-changed=${(ev) => this._updateCustomState(index, "icon", ev.detail.value)}
                 ></ha-icon-picker>
 
-                <ha-textfield
-                  .value=${rule.color || ""}
-                  .label=${"Color"}
-                  .placeholder=${"Color description or hex value"}
-                  @input=${(ev) => this._updateCustomState(index, "color", ev.target.value)}
-                ></ha-textfield>
+                <ha-form
+                  .hass=${this.hass}
+                  .data=${{ color: rule.color || "" }}
+                  .schema=${[{ name: "color", selector: { text: {} }, label: "Icon background color (e.g. red or #ff0000)" }]}
+                  .computeLabel=${this._computeLabel}
+                  @value-changed=${(ev) => this._updateCustomState(index, "color", ev.detail.value.color || "")}
+                ></ha-form>
               ` : ""}
             </div>
 

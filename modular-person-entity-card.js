@@ -228,6 +228,13 @@ var ModularPersonPopup = class extends LitElement {
       .overlay {
         position: fixed;
         inset: 0;
+        box-sizing: border-box;
+        height: 100vh;
+        height: 100dvh;
+        padding: max(12px, env(safe-area-inset-top))
+          max(12px, env(safe-area-inset-right))
+          max(12px, env(safe-area-inset-bottom))
+          max(12px, env(safe-area-inset-left));
         background: rgba(0, 0, 0, 0.5);
         z-index: 9999;
         display: flex;
@@ -236,13 +243,15 @@ var ModularPersonPopup = class extends LitElement {
       }
 
       .dialog {
+        box-sizing: border-box;
         background: var(--card-background-color, #fff);
         border-radius: 6px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         max-width: 800px;
         width: 90%;
         max-height: 100%;
-        overflow: auto;
+        min-height: 0;
+        overflow: hidden;
         position: relative;
         display: flex;
         flex-direction: column;
@@ -250,6 +259,7 @@ var ModularPersonPopup = class extends LitElement {
 
       .header {
         display: flex;
+        flex-shrink: 0;
         align-items: center;
         justify-content: space-between;
         gap: 8px;
@@ -302,8 +312,10 @@ var ModularPersonPopup = class extends LitElement {
 
       .content {
         padding: 16px;
-        flex: 1;
+        flex: 1 1 auto;
+        min-height: 0;
         overflow: auto;
+        -webkit-overflow-scrolling: touch;
       }
     `;
   }
@@ -664,12 +676,13 @@ var ModularPersonEntityCardEditor = class extends LitElement2 {
               </div>
 
               ${rule.interactive_icon !== false ? html2`
-                <ha-textfield
-                  .value=${rule.state || ""}
-                  .label=${"State / Rule"}
-                  .placeholder=${"on, >100, 10...50, >=10 && <50, <10 || >50"}
-                  @input=${(ev) => this._updateCustomState(index, "state", ev.target.value)}
-                ></ha-textfield>
+                <ha-form
+                  .hass=${this.hass}
+                  .data=${{ state: rule.state || "" }}
+                  .schema=${[{ name: "state", selector: { text: {} }, label: "State / Rule" }]}
+                  .computeLabel=${this._computeLabel}
+                  @value-changed=${(ev) => this._updateCustomState(index, "state", ev.detail.value.state || "")}
+                ></ha-form>
 
                 <ha-icon-picker
                   .hass=${this.hass}
@@ -678,12 +691,13 @@ var ModularPersonEntityCardEditor = class extends LitElement2 {
                   @value-changed=${(ev) => this._updateCustomState(index, "icon", ev.detail.value)}
                 ></ha-icon-picker>
 
-                <ha-textfield
-                  .value=${rule.color || ""}
-                  .label=${"Color"}
-                  .placeholder=${"Color description or hex value"}
-                  @input=${(ev) => this._updateCustomState(index, "color", ev.target.value)}
-                ></ha-textfield>
+                <ha-form
+                  .hass=${this.hass}
+                  .data=${{ color: rule.color || "" }}
+                  .schema=${[{ name: "color", selector: { text: {} }, label: "Icon background color (e.g. red or #ff0000)" }]}
+                  .computeLabel=${this._computeLabel}
+                  @value-changed=${(ev) => this._updateCustomState(index, "color", ev.detail.value.color || "")}
+                ></ha-form>
               ` : ""}
             </div>
 
@@ -972,7 +986,7 @@ var ModularPersonEntityCard = class extends LitElement3 {
         <ha-card>Entity not available: ${this.config.entity}</ha-card>
       `;
     }
-    const name = this.config.name || entity.attributes.friendly_name;
+    const name = this.config.name || this._getEntityDisplayName(entity);
     const stateIcon = this._getStateIcon(entity);
     const iconBackgroundColor = this._getStateIconBackgroundColor(entity);
     const ringEnabled = this.config.ring_tracker_enabled === true;
@@ -1044,6 +1058,10 @@ var ModularPersonEntityCard = class extends LitElement3 {
       </ha-card>
     `;
   }
+  _getEntityDisplayName(entity) {
+    const parts = [{ type: "parent_device" }, { type: "device" }, { type: "entity" }];
+    return this.hass.formatEntityName?.(entity, parts) || entity.attributes?.friendly_name || entity.name || entity.entity_id;
+  }
   _getStateDescription(entity) {
     const state = entity.state;
     if (state === "home") return "Home";
@@ -1057,9 +1075,7 @@ var ModularPersonEntityCard = class extends LitElement3 {
       return "Away";
     }
     const zone = this._getZoneEntity(state);
-    if (zone && zone.attributes && zone.attributes.friendly_name) {
-      return zone.attributes.friendly_name;
-    }
+    if (zone) return this._getEntityDisplayName(zone);
     return state.charAt(0).toUpperCase() + state.slice(1);
   }
   _getStateIcon(entity) {
@@ -1084,6 +1100,8 @@ var ModularPersonEntityCard = class extends LitElement3 {
       return [
         entityId,
         friendlyName,
+        this._getEntityDisplayName(entity),
+        this.hass.entities?.[entity.entity_id]?.name,
         entity.name,
         entity.state
       ].some((value) => this._normalizeZoneKey(value) === normalizedState);

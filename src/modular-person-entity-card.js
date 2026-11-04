@@ -222,7 +222,7 @@ class ModularPersonEntityCard extends LitElement {
       `;
     }
 
-    const name = this.config.name || entity.attributes.friendly_name;
+    const name = this.config.name || this._getEntityDisplayName(entity);
     const stateIcon = this._getStateIcon(entity);
     const iconBackgroundColor = this._getStateIconBackgroundColor(entity);
     const ringEnabled = this.config.ring_tracker_enabled === true;
@@ -298,6 +298,12 @@ class ModularPersonEntityCard extends LitElement {
     `;
   }
 
+  _getEntityDisplayName(entity) {
+    const parts = [{ type: "parent_device" }, { type: "device" }, { type: "entity" }];
+    return this.hass.formatEntityName?.(entity, parts) ||
+      entity.attributes?.friendly_name || entity.name || entity.entity_id;
+  }
+
   _getStateDescription(entity) {
     const state = entity.state;
     if (state === "home") return "Home";
@@ -311,9 +317,7 @@ class ModularPersonEntityCard extends LitElement {
       return "Away";
     }
     const zone = this._getZoneEntity(state);
-    if (zone && zone.attributes && zone.attributes.friendly_name) {
-      return zone.attributes.friendly_name;
-    }
+    if (zone) return this._getEntityDisplayName(zone);
     return state.charAt(0).toUpperCase() + state.slice(1);
   }
 
@@ -347,6 +351,8 @@ class ModularPersonEntityCard extends LitElement {
       return [
         entityId,
         friendlyName,
+        this._getEntityDisplayName(entity),
+        this.hass.entities?.[entity.entity_id]?.name,
         entity.name,
         entity.state,
       ].some((value) => this._normalizeZoneKey(value) === normalizedState);

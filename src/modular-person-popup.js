@@ -276,6 +276,13 @@ class ModularPersonPopup extends LitElement {
       .overlay {
         position: fixed;
         inset: 0;
+        box-sizing: border-box;
+        height: 100vh;
+        height: 100dvh;
+        padding: max(12px, env(safe-area-inset-top))
+          max(12px, env(safe-area-inset-right))
+          max(12px, env(safe-area-inset-bottom))
+          max(12px, env(safe-area-inset-left));
         background: rgba(0, 0, 0, 0.5);
         z-index: 9999;
         display: flex;
@@ -284,13 +291,15 @@ class ModularPersonPopup extends LitElement {
       }
 
       .dialog {
+        box-sizing: border-box;
         background: var(--card-background-color, #fff);
         border-radius: 6px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         max-width: 800px;
         width: 90%;
         max-height: 100%;
-        overflow: auto;
+        min-height: 0;
+        overflow: hidden;
         position: relative;
         display: flex;
         flex-direction: column;
@@ -298,6 +307,7 @@ class ModularPersonPopup extends LitElement {
 
       .header {
         display: flex;
+        flex-shrink: 0;
         align-items: center;
         justify-content: space-between;
         gap: 8px;
@@ -350,8 +360,10 @@ class ModularPersonPopup extends LitElement {
 
       .content {
         padding: 16px;
-        flex: 1;
+        flex: 1 1 auto;
+        min-height: 0;
         overflow: auto;
+        -webkit-overflow-scrolling: touch;
       }
     `;
   }

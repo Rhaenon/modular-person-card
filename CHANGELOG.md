@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 26.11.1
+
+- Keep the popup header accessible on smaller screens while scrolling the entity list
+- Restore the custom entity state and icon background color fields in the visual editor
+- Use Home Assistant's contextual entity naming for people and zones, with fallbacks for older versions
+
 ## 26.10.1
 
 - Added optional `map_color` to customize the popup map marker and history trail color
