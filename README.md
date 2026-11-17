@@ -198,8 +198,16 @@ unknown_icon_background_color: "#9e9e9e"
 | `history_hours` | number | `24` | Hours of history shown in the popup map |
 | `map_color` | string | empty | Native Home Assistant map color for the person marker and history trail, for example `"#9c27b0"` |
 | `ring_tracker_enabled` | boolean | auto | Enables the ring tracker |
-| `ring_tracker_entity` | string | empty | Numeric entity used for the ring |
-| `ring_boolean_entity` | string | empty | Optional helper entity for active/charging state |
+| `ring_tracker_entity` | string | empty | Entity used for the ring |
+| `ring_tracker_attribute` | string | empty | Optional numeric attribute to use instead of the entity state |
+| `ring_show_value` | boolean | `false` | Display the original ring value below the state |
+| `ring_boolean_entity` | string | empty | Optional helper entity for the active state |
+| `ring_boolean_attribute` | string | empty | Optional attribute of the Boolean entity controlling the active state |
+| `ring_critical_threshold` | number | `10` | Critical threshold as a normalized percentage, when Custom Colors is enabled |
+| `ring_low_threshold` | number | `25` | Low threshold as a normalized percentage, when Custom Colors is enabled |
+| `ring_critical_color` | string | `rgba(244, 67, 54, 0.75)` | Critical ring color |
+| `ring_low_color` | string | `#ff9800` | Low ring color |
+| `ring_normal_color` | string | primary text color | Normal ring color |
 | `ring_min` | number | `0` | Minimum value for ring normalization |
 | `ring_max` | number | `100` | Maximum value for ring normalization |
 | `custom_location_colors` | boolean | auto | Enables custom badge/ring color values |
@@ -240,6 +248,10 @@ ring_min: 0
 ring_max: 10000
 ```
 
+Choose an optional Ring Tracker Attribute in the visual editor to use that attribute explicitly (for example `battery_level`). Enable Show Ring Value to display the original value below the state.
+
+The critical and low thresholds are inclusive percentages of the configured range; set the critical threshold no higher than the low threshold. Their colors and the normal color can be configured when Custom Colors is enabled. Low and critical colors take precedence over the active color.
+
 ### Ring active and charging detection
 
 If `ring_boolean_entity` is set, the ring is treated as active when that entity is:
@@ -248,7 +260,9 @@ If `ring_boolean_entity` is set, the ring is treated as active when that entity 
 - `charging`
 - `true`
 
-The card also checks the tracked entity for common charging attributes like:
+Alternatively, select a Ring Boolean Attribute to use that attribute as the active signal. Boolean `true`, numeric `1`, and the strings `on`, `true`, `yes`, `1`, and `charging` count as active. When an attribute is selected it is the sole active signal.
+
+Without a selected Boolean attribute, the card also checks the tracked entity for common charging attributes like:
 
 - `charging: true`
 - `battery_charging: true`
@@ -263,7 +277,7 @@ The card tries these values in order:
 - `battery_level` attribute
 - `value` attribute
 
-If none are numeric, the ring is hidden.
+If an explicit tracker attribute is set, only that attribute is used. The ring is hidden if the tracker entity is unknown or unavailable, or if the selected value is not numeric.
 
 ## Custom Location Colors
 

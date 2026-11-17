@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## 26.11.2
+
+- Select a ring tracker attribute and optionally display its value below the state
+- Configure low and critical ring thresholds and colors when Custom Colors is enabled
+- Select an attribute on the Ring Boolean Entity to control its active indicator
+- Hide the ring when its tracker is unknown, unavailable, or has no numeric value
+
 ## 26.11.1
 
 - Keep the popup header accessible on smaller screens while scrolling the entity list

@@ -453,7 +453,15 @@ var ModularPersonEntityCardEditor = class extends LitElement2 {
       history_hours: 24,
       ring_tracker_enabled: ringTrackerEnabled,
       ring_tracker_entity: "",
+      ring_tracker_attribute: "",
       ring_boolean_entity: "",
+      ring_boolean_attribute: "",
+      ring_show_value: false,
+      ring_critical_threshold: 10,
+      ring_low_threshold: 25,
+      ring_critical_color: "rgba(244, 67, 54, 0.75)",
+      ring_low_color: "#ff9800",
+      ring_normal_color: "var(--primary-text-color, white)",
       ring_min: 0,
       ring_max: 100,
       custom_location_colors: customLocationColors,
@@ -532,13 +540,24 @@ var ModularPersonEntityCardEditor = class extends LitElement2 {
           },
           label: "Ring Tracker Entity"
         },
+        ...this._config.ring_tracker_entity ? [{
+          name: "ring_tracker_attribute",
+          selector: { attribute: { entity_id: this._config.ring_tracker_entity } },
+          label: "Ring Tracker Attribute (optional)"
+        }] : [],
         {
           name: "ring_boolean_entity",
           selector: {
             entity: {}
           },
-          label: "Ring Boolean Sensor"
+          label: "Ring Boolean Entity"
         },
+        ...this._config.ring_boolean_entity ? [{
+          name: "ring_boolean_attribute",
+          selector: { attribute: { entity_id: this._config.ring_boolean_entity } },
+          label: "Ring Boolean Attribute (optional)"
+        }] : [],
+        { name: "ring_show_value", type: "boolean", label: "Show Ring Value" },
         {
           name: "ring_min",
           selector: {
@@ -626,6 +645,15 @@ var ModularPersonEntityCardEditor = class extends LitElement2 {
           },
           label: "Ring Active Color"
         }
+      );
+    }
+    if (this._config.custom_location_colors === true && this._config.ring_tracker_enabled === true) {
+      schema.push(
+        { name: "ring_critical_threshold", selector: { number: { mode: "box", min: 0, max: 100 } }, label: "Critical Threshold (%)" },
+        { name: "ring_critical_color", selector: { text: {} }, label: "Critical Color" },
+        { name: "ring_low_threshold", selector: { number: { mode: "box", min: 0, max: 100 } }, label: "Low Threshold (%)" },
+        { name: "ring_low_color", selector: { text: {} }, label: "Low Color" },
+        { name: "ring_normal_color", selector: { text: {} }, label: "Normal Color" }
       );
     }
     const customStates = Array.isArray(this._config.custom_states) ? this._config.custom_states : [];
@@ -932,6 +960,10 @@ var ModularPersonEntityCard = class extends LitElement3 {
         overflow: hidden;
         text-overflow: ellipsis;
       }
+      .ring-value {
+        font-size: 0.9em;
+        color: var(--secondary-text-color, gray);
+      }
       .entity-text-container {
         display: flex;
         flex-direction: column;
@@ -952,7 +984,15 @@ var ModularPersonEntityCard = class extends LitElement3 {
       history_hours: 24,
       ring_tracker_enabled: Boolean(config.ring_tracker_enabled ?? config.ring_tracker_entity),
       ring_tracker_entity: "",
+      ring_tracker_attribute: "",
       ring_boolean_entity: "",
+      ring_boolean_attribute: "",
+      ring_show_value: false,
+      ring_critical_threshold: 10,
+      ring_low_threshold: 25,
+      ring_critical_color: "rgba(244, 67, 54, 0.75)",
+      ring_low_color: "#ff9800",
+      ring_normal_color: "var(--primary-text-color, white)",
       ring_min: 0,
       ring_max: 100,
       custom_location_colors: Boolean(
@@ -1053,6 +1093,7 @@ var ModularPersonEntityCard = class extends LitElement3 {
           <div class="entity-text-container">
             ${showName ? html3`<div class="name-text">${name}</div>` : ""}
             <div class="state-text">${stateText}</div>
+            ${this.config.ring_show_value === true && ringIndicator ? html3`<div class="ring-value">${ringIndicator.valueText}</div>` : ""}
           </div>
         </div>
       </ha-card>
@@ -1228,40 +1269,52 @@ var ModularPersonEntityCard = class extends LitElement3 {
     }
   }
   _getRingIndicator(ringEntity, chargingEntity) {
-    if (!ringEntity) return null;
-    const valueCandidates = [
+    if (!ringEntity || ["unknown", "unavailable"].includes(String(ringEntity.state ?? "").trim().toLowerCase())) return null;
+    const attribute = this.config.ring_tracker_attribute?.trim();
+    const valueCandidates = attribute ? [
+      Number.parseFloat(ringEntity.attributes?.[attribute])
+    ] : [
       Number.parseFloat(ringEntity.state),
       Number.parseFloat(ringEntity.attributes?.percentage),
       Number.parseFloat(ringEntity.attributes?.battery_level),
       Number.parseFloat(ringEntity.attributes?.value)
     ];
-    const rawValue = valueCandidates.find((value) => !Number.isNaN(value));
-    if (Number.isNaN(rawValue)) return null;
+    const rawValue = valueCandidates.find((value) => Number.isFinite(value));
+    if (rawValue === void 0) return null;
     const min = this._getNumericConfigValue(this.config.ring_min, 0);
     const max = this._getNumericConfigValue(this.config.ring_max, 100);
     const range = max - min;
     const normalizedLevel = range > 0 ? (rawValue - min) / range * 100 : rawValue;
     const level = Math.max(0, Math.min(100, normalizedLevel));
-    const isCharging = this._isChargingEntity(chargingEntity) || ringEntity.state === "charging" || ringEntity.attributes?.charging === true || ringEntity.attributes?.battery_charging === true || String(ringEntity.attributes?.status || "").trim().toLowerCase() === "charging";
+    const booleanAttribute = this.config.ring_boolean_attribute?.trim();
+    const isCharging = booleanAttribute ? this._isTruthyRingBoolean(chargingEntity?.attributes?.[booleanAttribute]) : this._isChargingEntity(chargingEntity) || ringEntity.state === "charging" || ringEntity.attributes?.charging === true || ringEntity.attributes?.battery_charging === true || String(ringEntity.attributes?.status || "").trim().toLowerCase() === "charging";
     const radius = 25;
     const circumference = 2 * Math.PI * radius;
     const visibleArc = circumference * 0.75;
     const gapArc = circumference - visibleArc;
     const progressArc = Math.max(0, visibleArc * (level / 100));
     const dashOffset = 0;
-    let color = "var(--primary-text-color, white)";
-    if (level <= 10) color = "rgba(244, 67, 54, 0.75)";
-    else if (level <= 25) color = "#ff9800";
+    const customColors = this.config.custom_location_colors === true;
+    const criticalThreshold = this._getNumericConfigValue(customColors ? this.config.ring_critical_threshold : void 0, 10);
+    const lowThreshold = this._getNumericConfigValue(customColors ? this.config.ring_low_threshold : void 0, 25);
+    let color = customColors && this.config.ring_normal_color || "var(--primary-text-color, white)";
+    if (level <= criticalThreshold) color = customColors && this.config.ring_critical_color || "rgba(244, 67, 54, 0.75)";
+    else if (level <= lowThreshold) color = customColors && this.config.ring_low_color || "#ff9800";
     else if (isCharging) {
       color = this.config.custom_location_colors === true ? this.config.ring_active_color : "var(--zone-icon-background-color, rgb(76, 175, 80, 0.75))";
     }
     return {
       color,
+      valueText: `${rawValue}${!attribute && ringEntity.attributes?.unit_of_measurement ? ` ${ringEntity.attributes.unit_of_measurement}` : ""}`,
       isCharging,
       dashOffset,
       trackDasharray: `${visibleArc} ${gapArc}`,
       progressDasharray: `${progressArc} ${circumference}`
     };
+  }
+  _isTruthyRingBoolean(value) {
+    if (value === true || value === 1) return true;
+    return typeof value === "string" && ["on", "true", "yes", "1", "charging"].includes(value.trim().toLowerCase());
   }
   _isChargingEntity(entity) {
     if (!entity) return false;
@@ -1294,7 +1347,15 @@ var ModularPersonEntityCard = class extends LitElement3 {
       history_hours: 24,
       ring_tracker_enabled: false,
       ring_tracker_entity: "",
+      ring_tracker_attribute: "",
       ring_boolean_entity: "",
+      ring_boolean_attribute: "",
+      ring_show_value: false,
+      ring_critical_threshold: 10,
+      ring_low_threshold: 25,
+      ring_critical_color: "rgba(244, 67, 54, 0.75)",
+      ring_low_color: "#ff9800",
+      ring_normal_color: "var(--primary-text-color, white)",
       ring_min: 0,
       ring_max: 100,
       custom_location_colors: false,

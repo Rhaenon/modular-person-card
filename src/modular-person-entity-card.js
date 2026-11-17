@@ -157,6 +157,10 @@ class ModularPersonEntityCard extends LitElement {
         overflow: hidden;
         text-overflow: ellipsis;
       }
+      .ring-value {
+        font-size: 0.9em;
+        color: var(--secondary-text-color, gray);
+      }
       .entity-text-container {
         display: flex;
         flex-direction: column;
@@ -178,7 +182,15 @@ class ModularPersonEntityCard extends LitElement {
       history_hours: 24,
       ring_tracker_enabled: Boolean(config.ring_tracker_enabled ?? config.ring_tracker_entity),
       ring_tracker_entity: "",
+      ring_tracker_attribute: "",
       ring_boolean_entity: "",
+      ring_boolean_attribute: "",
+      ring_show_value: false,
+      ring_critical_threshold: 10,
+      ring_low_threshold: 25,
+      ring_critical_color: "rgba(244, 67, 54, 0.75)",
+      ring_low_color: "#ff9800",
+      ring_normal_color: "var(--primary-text-color, white)",
       ring_min: 0,
       ring_max: 100,
       custom_location_colors: Boolean(
@@ -292,6 +304,7 @@ class ModularPersonEntityCard extends LitElement {
           <div class="entity-text-container">
             ${showName ? html`<div class="name-text">${name}</div>` : ""}
             <div class="state-text">${stateText}</div>
+            ${this.config.ring_show_value === true && ringIndicator ? html`<div class="ring-value">${ringIndicator.valueText}</div>` : ""}
           </div>
         </div>
       </ha-card>
@@ -502,75 +515,65 @@ class ModularPersonEntityCard extends LitElement {
   }
 
   _getRingIndicator(ringEntity, chargingEntity) {
-    if (!ringEntity) return null;
-
-    const valueCandidates = [
+    if (!ringEntity || ["unknown", "unavailable"].includes(String(ringEntity.state ?? "").trim().toLowerCase())) return null;
+    const attribute = this.config.ring_tracker_attribute?.trim();
+    const valueCandidates = attribute ? [
+      Number.parseFloat(ringEntity.attributes?.[attribute])
+    ] : [
       Number.parseFloat(ringEntity.state),
       Number.parseFloat(ringEntity.attributes?.percentage),
       Number.parseFloat(ringEntity.attributes?.battery_level),
-      Number.parseFloat(ringEntity.attributes?.value),
+      Number.parseFloat(ringEntity.attributes?.value)
     ];
-    const rawValue = valueCandidates.find((value) => !Number.isNaN(value));
-    if (Number.isNaN(rawValue)) return null;
-
+    const rawValue = valueCandidates.find((value) => Number.isFinite(value));
+    if (rawValue === undefined) return null;
     const min = this._getNumericConfigValue(this.config.ring_min, 0);
     const max = this._getNumericConfigValue(this.config.ring_max, 100);
     const range = max - min;
-    const normalizedLevel = range > 0 ? ((rawValue - min) / range) * 100 : rawValue;
+    const normalizedLevel = range > 0 ? (rawValue - min) / range * 100 : rawValue;
     const level = Math.max(0, Math.min(100, normalizedLevel));
-    const isCharging =
-      this._isChargingEntity(chargingEntity) ||
-      ringEntity.state === "charging" ||
-      ringEntity.attributes?.charging === true ||
-      ringEntity.attributes?.battery_charging === true ||
-      String(ringEntity.attributes?.status || "").trim().toLowerCase() === "charging";
-
+    const booleanAttribute = this.config.ring_boolean_attribute?.trim();
+    const isCharging = booleanAttribute
+      ? this._isTruthyRingBoolean(chargingEntity?.attributes?.[booleanAttribute])
+      : this._isChargingEntity(chargingEntity) || ringEntity.state === "charging" || ringEntity.attributes?.charging === true || ringEntity.attributes?.battery_charging === true || String(ringEntity.attributes?.status || "").trim().toLowerCase() === "charging";
     const radius = 25;
     const circumference = 2 * Math.PI * radius;
     const visibleArc = circumference * 0.75;
     const gapArc = circumference - visibleArc;
     const progressArc = Math.max(0, visibleArc * (level / 100));
     const dashOffset = 0;
-
-    let color = "var(--primary-text-color, white)";
-    if (level <= 10) color = "rgba(244, 67, 54, 0.75)";
-    else if (level <= 25) color = "#ff9800";
+    const customColors = this.config.custom_location_colors === true;
+    const criticalThreshold = this._getNumericConfigValue(customColors ? this.config.ring_critical_threshold : undefined, 10);
+    const lowThreshold = this._getNumericConfigValue(customColors ? this.config.ring_low_threshold : undefined, 25);
+    let color = customColors && this.config.ring_normal_color || "var(--primary-text-color, white)";
+    if (level <= criticalThreshold) color = customColors && this.config.ring_critical_color || "rgba(244, 67, 54, 0.75)";
+    else if (level <= lowThreshold) color = customColors && this.config.ring_low_color || "#ff9800";
     else if (isCharging) {
-      color = this.config.custom_location_colors === true
-        ? this.config.ring_active_color
-        : "var(--zone-icon-background-color, rgb(76, 175, 80, 0.75))";
+      color = this.config.custom_location_colors === true ? this.config.ring_active_color : "var(--zone-icon-background-color, rgb(76, 175, 80, 0.75))";
     }
-
     return {
       color,
+      valueText: `${rawValue}${!attribute && ringEntity.attributes?.unit_of_measurement ? ` ${ringEntity.attributes.unit_of_measurement}` : ""}`,
       isCharging,
       dashOffset,
       trackDasharray: `${visibleArc} ${gapArc}`,
-      progressDasharray: `${progressArc} ${circumference}`,
+      progressDasharray: `${progressArc} ${circumference}`
     };
   }
-
+  _isTruthyRingBoolean(value) {
+    if (value === true || value === 1) return true;
+    return typeof value === "string" && ["on", "true", "yes", "1", "charging"].includes(value.trim().toLowerCase());
+  }
   _isChargingEntity(entity) {
     if (!entity) return false;
-
     const state = String(entity.state ?? "").trim().toLowerCase();
-    return (
-      state === "on" ||
-      state === "charging" ||
-      state === "true" ||
-      entity.state === true ||
-      entity.attributes?.charging === true ||
-      entity.attributes?.battery_charging === true
-    );
+    return state === "on" || state === "charging" || state === "true" || entity.state === true || entity.attributes?.charging === true || entity.attributes?.battery_charging === true;
   }
-
   _getNumericConfigValue(value, fallback) {
     if (value === "" || value == null) return fallback;
-
     const parsed = Number(value);
     return Number.isFinite(parsed) ? parsed : fallback;
   }
-
   _showPopup() {
     const popup = document.createElement("modular-person-popup");
     popup.hass = this.hass;
@@ -594,7 +597,15 @@ class ModularPersonEntityCard extends LitElement {
         history_hours: 24,
         ring_tracker_enabled: false,
         ring_tracker_entity: "",
+      ring_tracker_attribute: "",
         ring_boolean_entity: "",
+      ring_boolean_attribute: "",
+      ring_show_value: false,
+      ring_critical_threshold: 10,
+      ring_low_threshold: 25,
+      ring_critical_color: "rgba(244, 67, 54, 0.75)",
+      ring_low_color: "#ff9800",
+      ring_normal_color: "var(--primary-text-color, white)",
         ring_min: 0,
         ring_max: 100,
         custom_location_colors: false,

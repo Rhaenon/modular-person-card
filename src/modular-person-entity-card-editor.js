@@ -128,7 +128,15 @@ class ModularPersonEntityCardEditor extends LitElement {
         history_hours: 24,
         ring_tracker_enabled: ringTrackerEnabled,
         ring_tracker_entity: "",
+      ring_tracker_attribute: "",
         ring_boolean_entity: "",
+      ring_boolean_attribute: "",
+      ring_show_value: false,
+      ring_critical_threshold: 10,
+      ring_low_threshold: 25,
+      ring_critical_color: "rgba(244, 67, 54, 0.75)",
+      ring_low_color: "#ff9800",
+      ring_normal_color: "var(--primary-text-color, white)",
         ring_min: 0,
         ring_max: 100,
         custom_location_colors: customLocationColors,
@@ -215,13 +223,24 @@ class ModularPersonEntityCardEditor extends LitElement {
           },
           label: "Ring Tracker Entity",
         },
+        ...(this._config.ring_tracker_entity ? [{
+          name: "ring_tracker_attribute",
+          selector: { attribute: { entity_id: this._config.ring_tracker_entity } },
+          label: "Ring Tracker Attribute (optional)",
+        }] : []),
         {
           name: "ring_boolean_entity",
           selector: {
             entity: {},
           },
-          label: "Ring Boolean Sensor",
+          label: "Ring Boolean Entity",
         },
+        ...(this._config.ring_boolean_entity ? [{
+          name: "ring_boolean_attribute",
+          selector: { attribute: { entity_id: this._config.ring_boolean_entity } },
+          label: "Ring Boolean Attribute (optional)",
+        }] : []),
+        { name: "ring_show_value", type: "boolean", label: "Show Ring Value" },
         {
           name: "ring_min",
           selector: {
@@ -314,6 +333,16 @@ class ModularPersonEntityCardEditor extends LitElement {
           },
           label: "Ring Active Color",
         }
+      );
+    }
+
+    if (this._config.custom_location_colors === true && this._config.ring_tracker_enabled === true) {
+      schema.push(
+        { name: "ring_critical_threshold", selector: { number: { mode: "box", min: 0, max: 100 } }, label: "Critical Threshold (%)" },
+        { name: "ring_critical_color", selector: { text: {} }, label: "Critical Color" },
+        { name: "ring_low_threshold", selector: { number: { mode: "box", min: 0, max: 100 } }, label: "Low Threshold (%)" },
+        { name: "ring_low_color", selector: { text: {} }, label: "Low Color" },
+        { name: "ring_normal_color", selector: { text: {} }, label: "Normal Color" }
       );
     }
 
